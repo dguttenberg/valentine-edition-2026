@@ -102,16 +102,8 @@ export default function Home() {
   const [generatedImage, setGeneratedImage] = useState("");
   const [generatedNote, setGeneratedNote] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const generateRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   // ─── Handlers ────────────────────────────────────────
   const handleStart = () => {
@@ -718,7 +710,8 @@ export default function Home() {
               color: "var(--background)",
             }}
           >
-            {isMobile ? "Share" : "Download PNG"}
+            <span className="sm:hidden">Share</span>
+            <span className="hidden sm:inline">Download PNG</span>
           </button>
           <button
             onClick={handleReset}
