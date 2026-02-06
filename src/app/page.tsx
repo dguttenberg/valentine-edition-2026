@@ -526,7 +526,7 @@ export default function Home() {
             className="text-xs mt-6"
             style={{
               fontFamily: "var(--font-sans)",
-              color: "var(--border-warm)",
+              color: "var(--warm-gray)",
             }}
           >
             {energy} &middot; {designLanguage} &middot; {piece}
@@ -697,7 +697,7 @@ export default function Home() {
                 className="text-[9px] tracking-[0.2em] uppercase text-center"
                 style={{
                   fontFamily: "var(--font-sans)",
-                  color: "var(--border-warm)",
+                  color: "var(--warm-gray)",
                 }}
               >
                 A small Valentine, sent a little differently.
