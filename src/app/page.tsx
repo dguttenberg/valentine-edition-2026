@@ -216,7 +216,7 @@ export default function Home() {
   // ─── Render: Landing ─────────────────────────────────
   if (appState === "landing") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6">
+      <div className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center animate-fade-in max-w-md">
           {/* Logo Lockup */}
           <div className="flex items-center justify-center gap-4 sm:gap-5 mb-10 sm:mb-12">
@@ -288,7 +288,7 @@ export default function Home() {
   // ─── Render: Selection ───────────────────────────────
   if (appState === "selecting") {
     return (
-      <div className="min-h-screen flex flex-col items-center px-6 py-10 sm:py-16">
+      <div className="min-h-dvh flex flex-col items-center px-6 py-10 sm:py-16">
         {/* Step indicator */}
         <div className="flex items-center gap-2 mb-10 sm:mb-16">
           {[1, 2, 3].map((s) => (
@@ -494,7 +494,7 @@ export default function Home() {
   // ─── Render: Generating ──────────────────────────────
   if (appState === "generating") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6">
+      <div className="min-h-dvh flex items-center justify-center px-6">
         <div className="text-center">
           <p
             className="text-xs tracking-[0.3em] uppercase mb-6 animate-subtle-pulse"
@@ -537,7 +537,7 @@ export default function Home() {
       : "from-stone-200 to-stone-100";
 
     return (
-      <div className="min-h-screen flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12">
+      <div className="flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12">
         {/* The Card (capturable) */}
         <div className="animate-fade-in-slow w-full flex justify-center">
           <div
