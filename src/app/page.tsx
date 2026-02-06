@@ -542,7 +542,7 @@ export default function Home() {
         <div>
           <div
             ref={cardRef}
-            className="valentine-card overflow-hidden mx-auto"
+            className="valentine-card mx-auto"
             style={{
               boxShadow:
                 "0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04)",
