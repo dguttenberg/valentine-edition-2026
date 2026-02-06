@@ -161,16 +161,30 @@ export default function Home() {
     if (!cardRef.current) return;
     setIsSaving(true);
     try {
-      const dataUrl = await toPng(cardRef.current, {
+      const opts = {
         quality: 0.95,
         pixelRatio: 2,
         backgroundColor: "#FFFFFF",
-      });
+        cacheBust: true,
+        skipFonts: true,
+      };
+
+      // Double-render: first call primes/caches images, second captures properly.
+      // This fixes blank output on mobile where base64 images aren't ready on first pass.
+      await toPng(cardRef.current, opts);
+      const dataUrl = await toPng(cardRef.current, opts);
+
       const filename = `valentine-card-2026-${energy?.toLowerCase().replace(/\s+/g, "-")}.png`;
 
-      // Convert data URL to blob for share API
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      // Manual blob conversion (more reliable than fetch(dataUrl) on mobile Safari)
+      const byteString = atob(dataUrl.split(",")[1]);
+      const mimeType = dataUrl.split(",")[0].split(":")[1].split(";")[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: mimeType });
       const file = new File([blob], filename, { type: "image/png" });
 
       // Try Web Share API (mobile — opens native share sheet)
