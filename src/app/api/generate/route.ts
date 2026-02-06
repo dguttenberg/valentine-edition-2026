@@ -2,24 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Energy → visual mood mapping
+// Energy → visual mood mapping (all within Valentine palette: dusty rose, champagne gold, warm white, matte blush, subtle wine, soft copper)
 const ENERGY_STYLES: Record<string, string> = {
   Devoted:
-    "warm golden ambient light, soft luminous focus, deep amber and honey tones, intimate radiating warmth",
+    "warm champagne-gold ambient light, soft luminous focus, blush and rose-gold tones, intimate radiating warmth against cream",
   Mysterious:
-    "dark moody atmospheric lighting, deep violet and midnight blue tones, dramatic layered shadows, veiled ethereal depth",
+    "deep muted wine and dusty mauve atmospheric lighting, soft layered shadows, veiled depth in burgundy and champagne",
   Playful:
-    "bright scattered prismatic light, soft pastel accents with unexpected color pops, dynamic asymmetric energy",
+    "bright scattered light through blush and soft copper tones, warm pastel pinks with champagne gold accents, dynamic asymmetric energy",
   Dramatic:
-    "high contrast chiaroscuro lighting, bold crimson and deep black tones, theatrical intensity, cinematic shadow play",
+    "high contrast lighting between deep wine and warm white, bold rose-gold highlights against rich burgundy shadows, theatrical intensity",
   Minimalist:
-    "vast clean white space, precise singular lines, restrained monochrome palette with one subtle metallic accent",
+    "vast warm white space, precise singular lines, restrained palette of matte blush with one champagne-gold metallic accent",
   "Old-School Romantic":
-    "soft diffused film-like grain, rose and ivory cream tones, classical symmetrical balance, nostalgic warmth",
+    "soft diffused film-like grain, dusty rose and ivory cream tones, classical symmetrical balance, nostalgic blush warmth",
   Modernist:
-    "geometric precision lighting, cool chrome and steel blue tones, sharp angular edges, contemporary clarity",
+    "geometric precision lighting, cool champagne and matte rose tones, sharp angular edges with warm copper accents, contemporary clarity",
   "Quietly Obsessed":
-    "intimate extreme macro perspective, warm muted earth tones, hypnotic singular focus, meditative stillness",
+    "intimate extreme macro perspective, warm dusty rose and soft gold earth tones, hypnotic singular focus, meditative blush stillness",
 };
 
 // Design Language → composition logic mapping
@@ -83,7 +83,7 @@ ABSOLUTE RULES:
 - Rich material textures: polished metal, light refraction, shadow play
 - Square 1:1 format
 - Single cohesive composition
-- Intentional, restrained color palette`;
+- COLOR PALETTE (mandatory): Work ONLY within this Valentine's palette — dusty rose, champagne gold, warm white, matte blush, subtle wine/burgundy, soft copper, ivory cream. No blues, no greens, no purples, no bright reds. The palette should feel elevated, modern, and warm — like a high-end jewelry editorial, not a greeting card.`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${GEMINI_API_KEY}`,
