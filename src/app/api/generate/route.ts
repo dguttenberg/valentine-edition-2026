@@ -243,7 +243,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         image: "",
-        note: "A small Valentine, for the timing.\nYour selections shaped something deliberate.\nStructure meeting expression, as intended.\nLooking forward to the conversation.",
+        note: "Warmth finds its form in the interplay of light and material. The composition settles into something unhurried — precise where it needs to be, soft where it can afford to be. A February gesture, held in gold and shadow.",
       },
       { status: 200 }
     );
