@@ -209,15 +209,14 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="text-center animate-fade-in max-w-md">
           {/* Logo Lockup */}
-          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-12">
+          <div className="flex items-center justify-center gap-4 sm:gap-5 mb-10 sm:mb-12">
             <img
-              src="/doner-logo.svg"
+              src="/doner-logo.png"
               alt="Doner"
-              className="h-5 sm:h-6"
-              style={{ filter: "brightness(0)" }}
+              className="h-4 sm:h-5"
             />
             <span
-              className="text-sm sm:text-base font-light"
+              className="text-xs sm:text-sm font-light"
               style={{
                 fontFamily: "var(--font-serif)",
                 color: "var(--warm-gray)",
@@ -227,9 +226,8 @@ export default function Home() {
             </span>
             <img
               src="/kay-logo.svg"
-              alt="Kay"
-              className="h-5 sm:h-6"
-              style={{ filter: "brightness(0)" }}
+              alt="Kay Jewelers"
+              className="h-8 sm:h-10"
             />
           </div>
 
