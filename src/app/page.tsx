@@ -1,0 +1,668 @@
+"use client";
+
+import { useState, useRef, useCallback } from "react";
+import { toPng } from "html-to-image";
+
+// ─── Types ───────────────────────────────────────────────
+type Energy =
+  | "Devoted"
+  | "Mysterious"
+  | "Playful"
+  | "Dramatic"
+  | "Minimalist"
+  | "Old-School Romantic"
+  | "Modernist"
+  | "Quietly Obsessed";
+
+type DesignLanguage =
+  | "Details"
+  | "Bold Gestures"
+  | "Patience"
+  | "Sparkle"
+  | "Precision"
+  | "Surprise"
+  | "Craft"
+  | "Timing";
+
+type JewelryPiece =
+  | "Sculptural Gold Cuff"
+  | "Diamond Line Necklace"
+  | "Geometric Hoop"
+  | "Delicate Chain Bracelet"
+  | "Architectural Ring";
+
+type AppState = "landing" | "selecting" | "generating" | "result";
+
+// ─── Option Data ─────────────────────────────────────────
+const ENERGIES: { value: Energy; desc: string }[] = [
+  { value: "Devoted", desc: "Warm, unwavering, close" },
+  { value: "Mysterious", desc: "Layered, veiled, magnetic" },
+  { value: "Playful", desc: "Bright, dynamic, unexpected" },
+  { value: "Dramatic", desc: "Bold, contrasted, theatrical" },
+  { value: "Minimalist", desc: "Clean, precise, essential" },
+  { value: "Old-School Romantic", desc: "Classic, soft, timeless" },
+  { value: "Modernist", desc: "Geometric, sharp, current" },
+  { value: "Quietly Obsessed", desc: "Intimate, focused, persistent" },
+];
+
+const DESIGN_LANGUAGES: { value: DesignLanguage; desc: string }[] = [
+  { value: "Details", desc: "Look closer" },
+  { value: "Bold Gestures", desc: "Say it large" },
+  { value: "Patience", desc: "Let it build" },
+  { value: "Sparkle", desc: "Catch the light" },
+  { value: "Precision", desc: "Every line matters" },
+  { value: "Surprise", desc: "Where you least expect" },
+  { value: "Craft", desc: "Made by hand" },
+  { value: "Timing", desc: "The right moment" },
+];
+
+const JEWELRY_PIECES: { value: JewelryPiece; desc: string }[] = [
+  {
+    value: "Sculptural Gold Cuff",
+    desc: "Architectural gold, bold and curved",
+  },
+  {
+    value: "Diamond Line Necklace",
+    desc: "Linear brilliance, point by point",
+  },
+  { value: "Geometric Hoop", desc: "Perfect circles, modern metal" },
+  {
+    value: "Delicate Chain Bracelet",
+    desc: "Fine links, quiet connections",
+  },
+  {
+    value: "Architectural Ring",
+    desc: "Structured geometry, statement form",
+  },
+];
+
+// ─── Gradient Fallbacks (if image gen fails) ─────────────
+const ENERGY_GRADIENTS: Record<Energy, string> = {
+  Devoted: "from-amber-200 via-orange-100 to-yellow-50",
+  Mysterious: "from-indigo-900 via-purple-800 to-slate-900",
+  Playful: "from-rose-200 via-sky-100 to-amber-100",
+  Dramatic: "from-red-900 via-stone-900 to-black",
+  Minimalist: "from-stone-100 via-white to-stone-50",
+  "Old-School Romantic": "from-rose-100 via-pink-50 to-cream",
+  Modernist: "from-slate-300 via-zinc-200 to-stone-100",
+  "Quietly Obsessed": "from-stone-400 via-amber-200 to-stone-300",
+};
+
+// ─── Component ───────────────────────────────────────────
+export default function Home() {
+  const [appState, setAppState] = useState<AppState>("landing");
+  const [step, setStep] = useState(1);
+  const [energy, setEnergy] = useState<Energy | null>(null);
+  const [designLanguage, setDesignLanguage] =
+    useState<DesignLanguage | null>(null);
+  const [piece, setPiece] = useState<JewelryPiece | null>(null);
+  const [generatedImage, setGeneratedImage] = useState("");
+  const [generatedNote, setGeneratedNote] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // ─── Handlers ────────────────────────────────────────
+  const handleStart = () => {
+    setAppState("selecting");
+    setStep(1);
+  };
+
+  const handleEnergySelect = (e: Energy) => {
+    setEnergy(e);
+    setTimeout(() => setStep(2), 300);
+  };
+
+  const handleDesignSelect = (d: DesignLanguage) => {
+    setDesignLanguage(d);
+    setTimeout(() => setStep(3), 300);
+  };
+
+  const handlePieceSelect = (p: JewelryPiece) => {
+    setPiece(p);
+  };
+
+  const handleGenerate = async () => {
+    if (!energy || !designLanguage || !piece) return;
+    setAppState("generating");
+
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ energy, designLanguage, piece }),
+      });
+      const data = await res.json();
+      setGeneratedImage(data.image || "");
+      setGeneratedNote(
+        data.note ||
+          "A small Valentine, for the timing.\nYour selections shaped something deliberate.\nStructure meeting expression, as intended.\nLooking forward to the conversation."
+      );
+      setAppState("result");
+    } catch {
+      setGeneratedImage("");
+      setGeneratedNote(
+        "A small Valentine, for the timing.\nYour selections shaped something deliberate.\nStructure meeting expression, as intended.\nLooking forward to the conversation."
+      );
+      setAppState("result");
+    }
+  };
+
+  const handleDownload = useCallback(async () => {
+    if (!cardRef.current) return;
+    setIsDownloading(true);
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: "#FFFFFF",
+      });
+      const link = document.createElement("a");
+      link.download = `valentine-edition-2026-${energy?.toLowerCase().replace(/\s+/g, "-")}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Download failed:", err);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [energy]);
+
+  const handleReset = () => {
+    setAppState("landing");
+    setStep(1);
+    setEnergy(null);
+    setDesignLanguage(null);
+    setPiece(null);
+    setGeneratedImage("");
+    setGeneratedNote("");
+  };
+
+  // ─── Render: Landing ─────────────────────────────────
+  if (appState === "landing") {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="text-center animate-fade-in max-w-md">
+          <p
+            className="text-xs tracking-[0.3em] uppercase mb-8"
+            style={{
+              fontFamily: "var(--font-sans)",
+              color: "var(--warm-gray)",
+            }}
+          >
+            Valentine Edition
+          </p>
+          <h1
+            className="text-5xl md:text-6xl font-light mb-6 leading-tight"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            2026
+          </h1>
+          <div
+            className="w-12 h-px mx-auto mb-8"
+            style={{ background: "var(--border-warm)" }}
+          />
+          <p
+            className="text-sm leading-relaxed mb-12 max-w-xs mx-auto"
+            style={{
+              fontFamily: "var(--font-sans)",
+              color: "var(--warm-gray)",
+            }}
+          >
+            Three selections. One composed artifact.
+            <br />A small Valentine, sent a little differently.
+          </p>
+          <button
+            onClick={handleStart}
+            className="text-xs tracking-[0.2em] uppercase px-8 py-3 border transition-all duration-300 hover:bg-foreground hover:text-background"
+            style={{
+              fontFamily: "var(--font-sans)",
+              borderColor: "var(--foreground)",
+            }}
+          >
+            Begin
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Render: Selection ───────────────────────────────
+  if (appState === "selecting") {
+    return (
+      <div className="min-h-screen flex flex-col items-center px-6 py-16">
+        {/* Step indicator */}
+        <div className="flex items-center gap-2 mb-16">
+          {[1, 2, 3].map((s) => (
+            <div
+              key={s}
+              className={`step-dot ${s === step ? "active" : s < step ? "completed" : ""}`}
+            />
+          ))}
+        </div>
+
+        {/* Step 1: Energy */}
+        {step === 1 && (
+          <div className="animate-fade-in w-full max-w-2xl">
+            <div className="text-center mb-12">
+              <p
+                className="text-xs tracking-[0.3em] uppercase mb-4"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  color: "var(--warm-gray)",
+                }}
+              >
+                Step 1 of 3
+              </p>
+              <h2
+                className="text-3xl md:text-4xl font-light"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
+                Pick your Valentine Energy
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {ENERGIES.map((e) => (
+                <button
+                  key={e.value}
+                  onClick={() => handleEnergySelect(e.value)}
+                  className={`selection-tile p-5 border text-left ${
+                    energy === e.value ? "selected" : ""
+                  }`}
+                  style={{ borderColor: "var(--border-warm)" }}
+                >
+                  <span
+                    className="block text-sm font-medium mb-1"
+                    style={{ fontFamily: "var(--font-sans)" }}
+                  >
+                    {e.value}
+                  </span>
+                  <span
+                    className="block text-xs"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      color: "var(--warm-gray)",
+                    }}
+                  >
+                    {e.desc}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Design Language */}
+        {step === 2 && (
+          <div className="animate-fade-in w-full max-w-2xl">
+            <div className="text-center mb-12">
+              <p
+                className="text-xs tracking-[0.3em] uppercase mb-4"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  color: "var(--warm-gray)",
+                }}
+              >
+                Step 2 of 3
+              </p>
+              <h2
+                className="text-3xl md:text-4xl font-light"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
+                Pick your Design Language
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {DESIGN_LANGUAGES.map((d) => (
+                <button
+                  key={d.value}
+                  onClick={() => handleDesignSelect(d.value)}
+                  className={`selection-tile p-5 border text-left ${
+                    designLanguage === d.value ? "selected" : ""
+                  }`}
+                  style={{ borderColor: "var(--border-warm)" }}
+                >
+                  <span
+                    className="block text-sm font-medium mb-1"
+                    style={{ fontFamily: "var(--font-sans)" }}
+                  >
+                    {d.value}
+                  </span>
+                  <span
+                    className="block text-xs"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      color: "var(--warm-gray)",
+                    }}
+                  >
+                    {d.desc}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Jewelry Piece */}
+        {step === 3 && (
+          <div className="animate-fade-in w-full max-w-2xl">
+            <div className="text-center mb-12">
+              <p
+                className="text-xs tracking-[0.3em] uppercase mb-4"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  color: "var(--warm-gray)",
+                }}
+              >
+                Step 3 of 3
+              </p>
+              <h2
+                className="text-3xl md:text-4xl font-light"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
+                Pick a Jewelry Piece
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-12">
+              {JEWELRY_PIECES.map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => handlePieceSelect(p.value)}
+                  className={`selection-tile p-6 border text-left ${
+                    piece === p.value ? "selected" : ""
+                  }`}
+                  style={{ borderColor: "var(--border-warm)" }}
+                >
+                  <span
+                    className="block text-sm font-medium mb-1"
+                    style={{ fontFamily: "var(--font-sans)" }}
+                  >
+                    {p.value}
+                  </span>
+                  <span
+                    className="block text-xs"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      color: "var(--warm-gray)",
+                    }}
+                  >
+                    {p.desc}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Summary + Generate */}
+            {piece && (
+              <div className="animate-fade-in text-center">
+                <div
+                  className="w-12 h-px mx-auto mb-6"
+                  style={{ background: "var(--border-warm)" }}
+                />
+                <p
+                  className="text-xs tracking-[0.15em] uppercase mb-2"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    color: "var(--warm-gray)",
+                  }}
+                >
+                  Your selections
+                </p>
+                <p
+                  className="text-lg mb-8"
+                  style={{ fontFamily: "var(--font-serif)" }}
+                >
+                  {energy} &middot; {designLanguage} &middot; {piece}
+                </p>
+                <button
+                  onClick={handleGenerate}
+                  className="text-xs tracking-[0.2em] uppercase px-10 py-3 transition-all duration-300"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    background: "var(--foreground)",
+                    color: "var(--background)",
+                  }}
+                >
+                  Generate Edition
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ─── Render: Generating ──────────────────────────────
+  if (appState === "generating") {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="text-center">
+          <p
+            className="text-xs tracking-[0.3em] uppercase mb-6 animate-subtle-pulse"
+            style={{
+              fontFamily: "var(--font-sans)",
+              color: "var(--warm-gray)",
+            }}
+          >
+            Composing your edition
+          </p>
+          <div className="w-48 h-px mx-auto overflow-hidden" style={{ background: "var(--border-warm)" }}>
+            <div
+              className="h-full animate-progress"
+              style={{ background: "var(--gold)" }}
+            />
+          </div>
+          <p
+            className="text-xs mt-6"
+            style={{
+              fontFamily: "var(--font-sans)",
+              color: "var(--border-warm)",
+            }}
+          >
+            {energy} &middot; {designLanguage} &middot; {piece}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Render: Result ──────────────────────────────────
+  if (appState === "result") {
+    const noteLines = generatedNote.split("\n").filter((l) => l.trim());
+    const fallbackGradient = energy
+      ? ENERGY_GRADIENTS[energy]
+      : "from-stone-200 to-stone-100";
+
+    return (
+      <div className="min-h-screen flex flex-col items-center px-6 py-12">
+        {/* The Card (capturable) */}
+        <div className="animate-fade-in-slow">
+          <div
+            ref={cardRef}
+            className="valentine-card overflow-hidden"
+            style={{
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04)",
+            }}
+          >
+            {/* Top Banner */}
+            <div className="px-10 pt-10 pb-6 text-center">
+              <p
+                className="text-[10px] tracking-[0.4em] uppercase"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  color: "var(--warm-gray)",
+                }}
+              >
+                Valentine Edition 2026
+              </p>
+            </div>
+
+            {/* Hero Image */}
+            <div className="px-8">
+              <div
+                className="w-full aspect-square overflow-hidden"
+                style={{ background: "#f5f3ef" }}
+              >
+                {generatedImage ? (
+                  <img
+                    src={generatedImage}
+                    alt="Generated Valentine Edition artwork"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className={`w-full h-full bg-gradient-to-br ${fallbackGradient} flex items-center justify-center`}
+                  >
+                    <div className="text-center opacity-30">
+                      <div
+                        className="w-16 h-16 border mx-auto mb-3"
+                        style={{
+                          borderColor: "var(--warm-gray)",
+                          transform: "rotate(45deg)",
+                        }}
+                      />
+                      <p
+                        className="text-xs tracking-[0.2em] uppercase"
+                        style={{ fontFamily: "var(--font-sans)" }}
+                      >
+                        Edition Artwork
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Metadata Block */}
+            <div className="px-10 pt-8 pb-4">
+              <div className="flex gap-8">
+                <div>
+                  <p
+                    className="text-[9px] tracking-[0.3em] uppercase mb-1"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      color: "var(--warm-gray)",
+                    }}
+                  >
+                    Energy
+                  </p>
+                  <p
+                    className="text-sm"
+                    style={{ fontFamily: "var(--font-serif)" }}
+                  >
+                    {energy}
+                  </p>
+                </div>
+                <div>
+                  <p
+                    className="text-[9px] tracking-[0.3em] uppercase mb-1"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      color: "var(--warm-gray)",
+                    }}
+                  >
+                    Language
+                  </p>
+                  <p
+                    className="text-sm"
+                    style={{ fontFamily: "var(--font-serif)" }}
+                  >
+                    {designLanguage}
+                  </p>
+                </div>
+                <div>
+                  <p
+                    className="text-[9px] tracking-[0.3em] uppercase mb-1"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      color: "var(--warm-gray)",
+                    }}
+                  >
+                    Piece
+                  </p>
+                  <p
+                    className="text-sm"
+                    style={{ fontFamily: "var(--font-serif)" }}
+                  >
+                    {piece}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="px-10">
+              <div
+                className="w-full h-px"
+                style={{ background: "var(--border-warm)" }}
+              />
+            </div>
+
+            {/* Note */}
+            <div className="px-10 py-6">
+              {noteLines.map((line, i) => (
+                <p
+                  key={i}
+                  className="text-sm leading-relaxed"
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontStyle: "italic",
+                    color: i === 0 ? "var(--foreground)" : "var(--warm-gray)",
+                  }}
+                >
+                  {line}
+                </p>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="px-10 pb-8">
+              <div
+                className="w-full h-px mb-6"
+                style={{ background: "var(--border-warm)" }}
+              />
+              <p
+                className="text-[9px] tracking-[0.2em] uppercase text-center"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  color: "var(--border-warm)",
+                }}
+              >
+                A small Valentine, sent a little differently.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions (below card, not captured) */}
+        <div className="mt-10 flex items-center gap-6 animate-fade-in">
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="text-xs tracking-[0.2em] uppercase px-8 py-3 transition-all duration-300 disabled:opacity-50"
+            style={{
+              fontFamily: "var(--font-sans)",
+              background: "var(--foreground)",
+              color: "var(--background)",
+            }}
+          >
+            {isDownloading ? "Exporting..." : "Download PNG"}
+          </button>
+          <button
+            onClick={handleReset}
+            className="text-xs tracking-[0.2em] uppercase px-6 py-3 border transition-all duration-300 hover:bg-foreground hover:text-background"
+            style={{
+              fontFamily: "var(--font-sans)",
+              borderColor: "var(--border-warm)",
+              color: "var(--warm-gray)",
+            }}
+          >
+            Start Over
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}

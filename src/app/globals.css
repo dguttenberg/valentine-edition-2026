@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FAF9F6;
+  --foreground: #1A1A1A;
+  --warm-gray: #6B6B6B;
+  --gold: #C4A265;
+  --gold-light: #D4B87A;
+  --border-warm: #E8E4DE;
+  --cream: #FAF9F6;
+  --card-bg: #FFFFFF;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-warm-gray: var(--warm-gray);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-border-warm: var(--border-warm);
+  --color-cream: var(--cream);
+  --color-card-bg: var(--card-bg);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Card capture styles */
+.valentine-card {
+  width: 540px;
+  background: #FFFFFF;
+  position: relative;
+}
+
+/* Selection tile hover */
+.selection-tile {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.selection-tile:hover {
+  border-color: var(--gold);
+  background: rgba(196, 162, 101, 0.04);
+}
+.selection-tile.selected {
+  border-color: var(--gold);
+  background: rgba(196, 162, 101, 0.08);
+}
+
+/* Fade animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInSlow {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+.animate-fade-in-slow {
+  animation: fadeInSlow 1s ease forwards;
+}
+
+/* Generating pulse */
+@keyframes subtlePulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.animate-subtle-pulse {
+  animation: subtlePulse 2s ease-in-out infinite;
+}
+
+/* Progress bar */
+@keyframes progressGrow {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+.animate-progress {
+  animation: progressGrow 12s ease-in-out forwards;
+}
+
+/* Step indicator */
+.step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-warm);
+  transition: all 0.3s ease;
+}
+.step-dot.active {
+  background: var(--gold);
+  width: 24px;
+  border-radius: 3px;
+}
+.step-dot.completed {
+  background: var(--gold);
+}
