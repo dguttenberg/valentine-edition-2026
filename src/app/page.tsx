@@ -158,7 +158,6 @@ export default function Home() {
         pixelRatio: 2,
         backgroundColor: "#FFFFFF",
         cacheBust: true,
-        skipFonts: true,
       };
 
       // Double-render: first call primes/caches images, second captures properly.
