@@ -667,7 +667,7 @@ export default function Home() {
               {noteLines.map((line, i) => (
                 <p
                   key={i}
-                  className="text-sm leading-relaxed mb-1 last:mb-0"
+                  className="text-base sm:text-lg leading-relaxed mb-1 last:mb-0"
                   style={{
                     fontFamily: "var(--font-serif)",
                     fontStyle: "italic",
