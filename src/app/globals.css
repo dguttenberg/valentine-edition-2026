@@ -32,9 +32,24 @@ body {
 
 /* Card capture styles */
 .valentine-card {
-  width: 540px;
+  width: 100%;
+  max-width: 540px;
   background: #FFFFFF;
   position: relative;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .valentine-card {
+    max-width: 100%;
+  }
+  .card-meta {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .card-note p {
+    font-size: 0.8125rem;
+  }
 }
 
 /* Selection tile hover */

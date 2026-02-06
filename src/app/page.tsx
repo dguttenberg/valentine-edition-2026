@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { toPng } from "html-to-image";
 
 // ─── Types ───────────────────────────────────────────────
@@ -99,7 +99,15 @@ export default function Home() {
   const [generatedImage, setGeneratedImage] = useState("");
   const [generatedNote, setGeneratedNote] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // ─── Handlers ────────────────────────────────────────
   const handleStart = () => {
@@ -135,19 +143,19 @@ export default function Home() {
       setGeneratedImage(data.image || "");
       setGeneratedNote(
         data.note ||
-          "A small Valentine, for the timing.\nYour selections shaped something deliberate.\nStructure meeting expression, as intended.\nLooking forward to the conversation."
+          "Warmth finds its form in the interplay of light and material. The composition settles into something unhurried — precise where it needs to be, soft where it can afford to be. A February gesture, held in gold and shadow."
       );
       setAppState("result");
     } catch {
       setGeneratedImage("");
       setGeneratedNote(
-        "A small Valentine, for the timing.\nYour selections shaped something deliberate.\nStructure meeting expression, as intended.\nLooking forward to the conversation."
+        "Warmth finds its form in the interplay of light and material. The composition settles into something unhurried — precise where it needs to be, soft where it can afford to be. A February gesture, held in gold and shadow."
       );
       setAppState("result");
     }
   };
 
-  const handleDownload = useCallback(async () => {
+  const handleSave = useCallback(async () => {
     if (!cardRef.current) return;
     setIsDownloading(true);
     try {
@@ -156,12 +164,31 @@ export default function Home() {
         pixelRatio: 2,
         backgroundColor: "#FFFFFF",
       });
-      const link = document.createElement("a");
-      link.download = `valentine-edition-2026-${energy?.toLowerCase().replace(/\s+/g, "-")}.png`;
-      link.href = dataUrl;
-      link.click();
+      const filename = `valentine-edition-2026-${energy?.toLowerCase().replace(/\s+/g, "-")}.png`;
+
+      // Convert data URL to blob for share API
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], filename, { type: "image/png" });
+
+      // Try Web Share API (mobile — opens native share sheet with "Save Image")
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Valentine Edition 2026",
+        });
+      } else {
+        // Fallback: standard download (desktop)
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = dataUrl;
+        link.click();
+      }
     } catch (err) {
-      console.error("Download failed:", err);
+      // User cancelled share sheet — not an error
+      if (err instanceof Error && err.name !== "AbortError") {
+        console.error("Save failed:", err);
+      }
     } finally {
       setIsDownloading(false);
     }
@@ -362,7 +389,7 @@ export default function Home() {
                 Pick a Jewelry Piece
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-12">
               {JEWELRY_PIECES.map((p) => (
                 <button
                   key={p.value}
@@ -468,13 +495,14 @@ export default function Home() {
 
   // ─── Render: Result ──────────────────────────────────
   if (appState === "result") {
+    // New curator copy is paragraph prose, but handle both formats
     const noteLines = generatedNote.split("\n").filter((l) => l.trim());
     const fallbackGradient = energy
       ? ENERGY_GRADIENTS[energy]
       : "from-stone-200 to-stone-100";
 
     return (
-      <div className="min-h-screen flex flex-col items-center px-6 py-12">
+      <div className="min-h-screen flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12">
         {/* The Card (capturable) */}
         <div className="animate-fade-in-slow">
           <div
@@ -485,7 +513,7 @@ export default function Home() {
             }}
           >
             {/* Top Banner */}
-            <div className="px-10 pt-10 pb-6 text-center">
+            <div className="px-6 sm:px-10 pt-8 sm:pt-10 pb-4 sm:pb-6 text-center">
               <p
                 className="text-[10px] tracking-[0.4em] uppercase"
                 style={{
@@ -498,7 +526,7 @@ export default function Home() {
             </div>
 
             {/* Hero Image */}
-            <div className="px-8">
+            <div className="px-4 sm:px-8">
               <div
                 className="w-full aspect-square overflow-hidden"
                 style={{ background: "#f5f3ef" }}
@@ -534,8 +562,8 @@ export default function Home() {
             </div>
 
             {/* Metadata Block */}
-            <div className="px-10 pt-8 pb-4">
-              <div className="flex gap-8">
+            <div className="px-6 sm:px-10 pt-6 sm:pt-8 pb-4">
+              <div className="card-meta flex flex-wrap gap-4 sm:gap-8">
                 <div>
                   <p
                     className="text-[9px] tracking-[0.3em] uppercase mb-1"
@@ -591,7 +619,7 @@ export default function Home() {
             </div>
 
             {/* Divider */}
-            <div className="px-10">
+            <div className="px-6 sm:px-10">
               <div
                 className="w-full h-px"
                 style={{ background: "var(--border-warm)" }}
@@ -599,15 +627,15 @@ export default function Home() {
             </div>
 
             {/* Note */}
-            <div className="px-10 py-6">
+            <div className="card-note px-6 sm:px-10 py-5 sm:py-6">
               {noteLines.map((line, i) => (
                 <p
                   key={i}
-                  className="text-sm leading-relaxed"
+                  className="text-sm leading-relaxed mb-1 last:mb-0"
                   style={{
                     fontFamily: "var(--font-serif)",
                     fontStyle: "italic",
-                    color: i === 0 ? "var(--foreground)" : "var(--warm-gray)",
+                    color: "var(--warm-gray)",
                   }}
                 >
                   {line}
@@ -616,9 +644,9 @@ export default function Home() {
             </div>
 
             {/* Footer */}
-            <div className="px-10 pb-8">
+            <div className="px-6 sm:px-10 pb-6 sm:pb-8">
               <div
-                className="w-full h-px mb-6"
+                className="w-full h-px mb-4 sm:mb-6"
                 style={{ background: "var(--border-warm)" }}
               />
               <p
@@ -635,22 +663,22 @@ export default function Home() {
         </div>
 
         {/* Actions (below card, not captured) */}
-        <div className="mt-10 flex items-center gap-6 animate-fade-in">
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 animate-fade-in w-full max-w-sm sm:max-w-none sm:w-auto">
           <button
-            onClick={handleDownload}
+            onClick={handleSave}
             disabled={isDownloading}
-            className="text-xs tracking-[0.2em] uppercase px-8 py-3 transition-all duration-300 disabled:opacity-50"
+            className="text-xs tracking-[0.2em] uppercase px-8 py-3 transition-all duration-300 disabled:opacity-50 w-full sm:w-auto"
             style={{
               fontFamily: "var(--font-sans)",
               background: "var(--foreground)",
               color: "var(--background)",
             }}
           >
-            {isDownloading ? "Exporting..." : "Download PNG"}
+            {isDownloading ? "Exporting..." : isMobile ? "Save Image" : "Download PNG"}
           </button>
           <button
             onClick={handleReset}
-            className="text-xs tracking-[0.2em] uppercase px-6 py-3 border transition-all duration-300 hover:bg-foreground hover:text-background"
+            className="text-xs tracking-[0.2em] uppercase px-6 py-3 border transition-all duration-300 hover:bg-foreground hover:text-background w-full sm:w-auto"
             style={{
               fontFamily: "var(--font-sans)",
               borderColor: "var(--border-warm)",
