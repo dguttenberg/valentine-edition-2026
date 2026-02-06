@@ -537,12 +537,12 @@ export default function Home() {
       : "from-stone-200 to-stone-100";
 
     return (
-      <div className="flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12">
+      <div className="px-4 sm:px-6 py-8 sm:py-12">
         {/* The Card (capturable) */}
-        <div className="animate-fade-in-slow w-full flex justify-center">
+        <div>
           <div
             ref={cardRef}
-            className="valentine-card overflow-hidden"
+            className="valentine-card overflow-hidden mx-auto"
             style={{
               boxShadow:
                 "0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04)",
@@ -699,7 +699,7 @@ export default function Home() {
         </div>
 
         {/* Actions (below card, not captured) */}
-        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 animate-fade-in w-full max-w-sm sm:max-w-none sm:w-auto">
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6">
           <button
             onClick={handleSave}
             disabled={isSaving}

@@ -24,12 +24,6 @@
   --color-card-bg: var(--card-bg);
 }
 
-html, body {
-  height: auto;
-  overflow-x: hidden;
-  overscroll-behavior: none;
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
