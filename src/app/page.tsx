@@ -88,6 +88,9 @@ const ENERGY_GRADIENTS: Record<Energy, string> = {
   "Quietly Obsessed": "from-stone-400 via-amber-200 to-stone-300",
 };
 
+const FALLBACK_NOTE =
+  "Warmth finds its form in the interplay of light and material. The composition settles into something unhurried — precise where it needs to be, soft where it can afford to be. A February gesture, held in gold and shadow.";
+
 // ─── Component ───────────────────────────────────────────
 export default function Home() {
   const [appState, setAppState] = useState<AppState>("landing");
@@ -98,7 +101,7 @@ export default function Home() {
   const [piece, setPiece] = useState<JewelryPiece | null>(null);
   const [generatedImage, setGeneratedImage] = useState("");
   const [generatedNote, setGeneratedNote] = useState("");
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -141,41 +144,37 @@ export default function Home() {
       });
       const data = await res.json();
       setGeneratedImage(data.image || "");
-      setGeneratedNote(
-        data.note ||
-          "Warmth finds its form in the interplay of light and material. The composition settles into something unhurried — precise where it needs to be, soft where it can afford to be. A February gesture, held in gold and shadow."
-      );
+      setGeneratedNote(data.note || FALLBACK_NOTE);
       setAppState("result");
     } catch {
       setGeneratedImage("");
-      setGeneratedNote(
-        "Warmth finds its form in the interplay of light and material. The composition settles into something unhurried — precise where it needs to be, soft where it can afford to be. A February gesture, held in gold and shadow."
-      );
+      setGeneratedNote(FALLBACK_NOTE);
       setAppState("result");
     }
   };
 
   const handleSave = useCallback(async () => {
     if (!cardRef.current) return;
-    setIsDownloading(true);
+    setIsSaving(true);
     try {
       const dataUrl = await toPng(cardRef.current, {
         quality: 0.95,
         pixelRatio: 2,
         backgroundColor: "#FFFFFF",
       });
-      const filename = `valentine-edition-2026-${energy?.toLowerCase().replace(/\s+/g, "-")}.png`;
+      const filename = `valentine-card-2026-${energy?.toLowerCase().replace(/\s+/g, "-")}.png`;
 
       // Convert data URL to blob for share API
       const res = await fetch(dataUrl);
       const blob = await res.blob();
       const file = new File([blob], filename, { type: "image/png" });
 
-      // Try Web Share API (mobile — opens native share sheet with "Save Image")
+      // Try Web Share API (mobile — opens native share sheet)
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        setIsSaving(false); // Clear state before share sheet appears
         await navigator.share({
           files: [file],
-          title: "Valentine Edition 2026",
+          title: "Valentine Card 2026",
         });
       } else {
         // Fallback: standard download (desktop)
@@ -183,14 +182,14 @@ export default function Home() {
         link.download = filename;
         link.href = dataUrl;
         link.click();
+        setIsSaving(false);
       }
     } catch (err) {
       // User cancelled share sheet — not an error
       if (err instanceof Error && err.name !== "AbortError") {
         console.error("Save failed:", err);
       }
-    } finally {
-      setIsDownloading(false);
+      setIsSaving(false);
     }
   }, [energy]);
 
@@ -209,6 +208,31 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="text-center animate-fade-in max-w-md">
+          {/* Logo Lockup */}
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-12">
+            <img
+              src="/doner-logo.svg"
+              alt="Doner"
+              className="h-5 sm:h-6"
+              style={{ filter: "brightness(0)" }}
+            />
+            <span
+              className="text-sm sm:text-base font-light"
+              style={{
+                fontFamily: "var(--font-serif)",
+                color: "var(--warm-gray)",
+              }}
+            >
+              &times;
+            </span>
+            <img
+              src="/kay-logo.svg"
+              alt="Kay"
+              className="h-5 sm:h-6"
+              style={{ filter: "brightness(0)" }}
+            />
+          </div>
+
           <p
             className="text-xs tracking-[0.3em] uppercase mb-8"
             style={{
@@ -216,7 +240,7 @@ export default function Home() {
               color: "var(--warm-gray)",
             }}
           >
-            Valentine Edition
+            Valentine Card
           </p>
           <h1
             className="text-5xl md:text-6xl font-light mb-6 leading-tight"
@@ -449,7 +473,7 @@ export default function Home() {
                     color: "var(--background)",
                   }}
                 >
-                  Generate Edition
+                  Create Card
                 </button>
               </div>
             )}
@@ -471,9 +495,12 @@ export default function Home() {
               color: "var(--warm-gray)",
             }}
           >
-            Composing your edition
+            Composing your card
           </p>
-          <div className="w-48 h-px mx-auto overflow-hidden" style={{ background: "var(--border-warm)" }}>
+          <div
+            className="w-48 h-px mx-auto overflow-hidden"
+            style={{ background: "var(--border-warm)" }}
+          >
             <div
               className="h-full animate-progress"
               style={{ background: "var(--gold)" }}
@@ -504,12 +531,13 @@ export default function Home() {
     return (
       <div className="min-h-screen flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12">
         {/* The Card (capturable) */}
-        <div className="animate-fade-in-slow">
+        <div className="animate-fade-in-slow w-full flex justify-center">
           <div
             ref={cardRef}
             className="valentine-card overflow-hidden"
             style={{
-              boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04)",
+              boxShadow:
+                "0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04)",
             }}
           >
             {/* Top Banner */}
@@ -521,7 +549,7 @@ export default function Home() {
                   color: "var(--warm-gray)",
                 }}
               >
-                Valentine Edition 2026
+                Valentine Card 2026
               </p>
             </div>
 
@@ -534,7 +562,7 @@ export default function Home() {
                 {generatedImage ? (
                   <img
                     src={generatedImage}
-                    alt="Generated Valentine Edition artwork"
+                    alt="Generated Valentine Card artwork"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -553,7 +581,7 @@ export default function Home() {
                         className="text-xs tracking-[0.2em] uppercase"
                         style={{ fontFamily: "var(--font-sans)" }}
                       >
-                        Edition Artwork
+                        Card Artwork
                       </p>
                     </div>
                   </div>
@@ -666,7 +694,7 @@ export default function Home() {
         <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 animate-fade-in w-full max-w-sm sm:max-w-none sm:w-auto">
           <button
             onClick={handleSave}
-            disabled={isDownloading}
+            disabled={isSaving}
             className="text-xs tracking-[0.2em] uppercase px-8 py-3 transition-all duration-300 disabled:opacity-50 w-full sm:w-auto"
             style={{
               fontFamily: "var(--font-sans)",
@@ -674,7 +702,7 @@ export default function Home() {
               color: "var(--background)",
             }}
           >
-            {isDownloading ? "Exporting..." : isMobile ? "Save Image" : "Download PNG"}
+            {isMobile ? "Share" : "Download PNG"}
           </button>
           <button
             onClick={handleReset}

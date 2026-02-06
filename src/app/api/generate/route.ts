@@ -177,9 +177,9 @@ async function generateNote(
   const languageDesc = LANGUAGE_VOICE[designLanguage] || designLanguage.toLowerCase();
   const pieceDesc = PIECE_VOICE[piece] || piece.toLowerCase();
 
-  const prompt = `You are writing a short curator's description for a limited-edition Valentine's art print. This is a wall-text placard — the kind you'd read next to an artwork in a gallery.
+  const prompt = `You are writing a short curator's description for a Valentine's art card. This is a wall-text placard — the kind you'd read next to an artwork in a gallery.
 
-The edition was shaped by three selections:
+The card was shaped by three selections:
 - Energy: "${energy}" — ${energyDesc}
 - Design Language: "${designLanguage}" — ${languageDesc}
 - Piece: "${piece}" — ${pieceDesc}
@@ -194,7 +194,7 @@ RULES:
 - NO clichés, NO greeting-card language, NO exclamation points
 - NO mention of AI, generation, technology, or algorithms
 - NO selling, brand language, or calls to action
-- NO "this edition" or "your edition" — describe the work itself
+- NO "this card" or "your card" — describe the work itself
 - Present tense. Declarative sentences. Confident but unhurried.
 
 Write ONLY the description. No title, no quotes, no attribution.`;

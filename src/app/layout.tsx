@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Valentine Edition 2026",
+  title: "Valentine Card 2026",
   description: "A small Valentine, sent a little differently.",
 };
 
