@@ -663,7 +663,7 @@ export default function Home() {
             </div>
 
             {/* Note */}
-            <div className="card-note px-6 sm:px-10 py-5 sm:py-6">
+            <div className="card-note px-6 sm:px-10 pt-5 sm:pt-6 pb-8 sm:pb-10">
               {noteLines.map((line, i) => (
                 <p
                   key={i}
@@ -680,7 +680,7 @@ export default function Home() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 sm:px-10 pb-6 sm:pb-8">
+            <div className="px-6 sm:px-10 pb-8 sm:pb-10">
               <div
                 className="w-full h-px mb-4 sm:mb-6"
                 style={{ background: "var(--border-warm)" }}
