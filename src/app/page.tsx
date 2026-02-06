@@ -104,6 +104,7 @@ export default function Home() {
   const [isSaving, setIsSaving] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const generateRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -130,6 +131,9 @@ export default function Home() {
 
   const handlePieceSelect = (p: JewelryPiece) => {
     setPiece(p);
+    setTimeout(() => {
+      generateRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
   };
 
   const handleGenerate = async () => {
@@ -278,9 +282,9 @@ export default function Home() {
   // ─── Render: Selection ───────────────────────────────
   if (appState === "selecting") {
     return (
-      <div className="min-h-screen flex flex-col items-center px-6 py-16">
+      <div className="min-h-screen flex flex-col items-center px-6 py-10 sm:py-16">
         {/* Step indicator */}
-        <div className="flex items-center gap-2 mb-16">
+        <div className="flex items-center gap-2 mb-10 sm:mb-16">
           {[1, 2, 3].map((s) => (
             <div
               key={s}
@@ -442,7 +446,7 @@ export default function Home() {
 
             {/* Summary + Generate */}
             {piece && (
-              <div className="animate-fade-in text-center">
+              <div ref={generateRef} className="animate-fade-in text-center">
                 <div
                   className="w-12 h-px mx-auto mb-6"
                   style={{ background: "var(--border-warm)" }}
